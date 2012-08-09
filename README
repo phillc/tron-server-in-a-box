@@ -1,0 +1,82 @@
+Server:
+
+  Extract tronserver.tar.gz and build:
+
+    $ tar zxf tronserver.tar.gz
+    $ make
+
+  Start server:
+
+    $ ./server
+
+  The server produces a file results.pgn, which contains the game results.
+
+  To shut down the server gracefully (letting it complete ongoing games), send the
+  process a SIGUSR1. To abort ongoing games (informing clients) send SIGUSR2.
+
+  The expire tool can be used to remove all games older than 24 hours from the
+  results.pgn file.
+
+Bayesian Elo Rating:
+
+  Download http://remi.coulom.free.fr/Bayesian-Elo/bayeselo.tar.bz2, extract, and build:
+
+    $ bunzip2 bayeselo.tar.bz2
+    $ tar xf bayeselo.tar
+    $ cd BayesElo
+    $ make
+
+  Keep the resulting bayeselo binary.
+
+Scripts:
+
+  Create a script which runs bayeselo with results.pgn, producing ratings.txt:
+
+    #!/bin/sh
+    printf "prompt off\nreadpgn results.pgn\nelo\nmm\nexactdist\nratings\nx\nx\n" | \
+      ./BayesElo/bayeselo >ratings.txt 2>&1
+
+  Use a crontab or similar to run this script every minute.
+
+Web server:
+
+  A couple of CGIs are provided which produce HTML pages from the results.pgn and
+  ratings.txt files.
+
+    $ cd htdocs
+    $ make
+
+    getratings
+
+      Produces a HTML table from the contents of ratings.txt.
+
+    getplayer?player=name
+
+      Produces a HTML table with the latest games of the specified player.
+
+    getmaps
+
+      Produces a HTML table with all maps which have been played, including
+      some statistics like draw percentages.
+
+    getgame?game_id=timestamp|player1|player2
+
+      Produces a plain text representation of the specified game, usable with
+      the JavaScript visualiser.
+
+  The other files in the htdocs directory are used for the JavaScript visualiser, they
+  were copied from the official server.
+
+    viz/loading.gif
+    viz/end.png
+    viz/forward.png
+    viz/pause.png
+    viz/playbackward.png
+    viz/playforward.png
+    viz/start.png
+    viz/backward.png
+    style.css
+    visualizer.js
+    visualizer.html
+
+Daniel Hartmeier <daniel@benzedrine.cx>
